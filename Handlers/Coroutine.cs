@@ -1,11 +1,6 @@
 ﻿using AdminToys;
-using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Interactables.Interobjects;
-using Interactables.Interobjects.DoorUtils;
-using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Pickups;
-using MapGeneration;
 using MEC;
 using Mirror;
 using UnityEngine;
@@ -25,7 +20,7 @@ public static class Coroutine
         {
             try
             {
-                var networkIdenitites = UnityEngine.Object.FindObjectsOfType<NetworkIdentity>().ToList();
+                List<NetworkIdentity> networkIdenitites = UnityEngine.Object.FindObjectsOfType<NetworkIdentity>().ToList();
 
                 // оставляем только пикапы и все спавненные админами штуки
                 // примитивы свет вся хуйня
@@ -33,18 +28,18 @@ public static class Coroutine
                 x.GetComponent<ItemPickupBase>() is not null
                 || x.GetComponent<AdminToyBase>() is not null).ToList();
 
-                foreach(var player in Player.List)
+                foreach (Player? player in Player.List)
                 {
                     if (!SpawnedNetworkIdentity.ContainsKey(player))
                         SpawnedNetworkIdentity.Add(player, networkIdenitites);
 
-                    if(player.IsDead)
+                    if (player.IsDead)
                     {
                         SpawnAllIfNot(networkIdenitites, player);
                         continue;
                     }
 
-                    foreach(var networkIdenitity in networkIdenitites.ToList())
+                    foreach (NetworkIdentity? networkIdenitity in networkIdenitites.ToList())
                     {
                         if (networkIdenitity.netId == 0) continue;
 
@@ -63,7 +58,7 @@ public static class Coroutine
     {
         if (SpawnedNetworkIdentity.All(x => x.Value == networkIdentities)) return;
 
-        foreach(var identity in networkIdentities)
+        foreach (NetworkIdentity identity in networkIdentities)
         {
             if (SpawnedNetworkIdentity[pl].Contains(identity)) return;
 
