@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net4.8</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<LangVersion>default</LangVersion>
+	<PlatformTarget>x64</PlatformTarget>
+	  <DebugType>embedded</DebugType>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EXILED-OFFICIAL" Version="8.12.2" />
+    <PackageReference Include="Lib.Harmony" Version="2.3.3" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>D:\github\CompileFiles\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="Mirror">
+      <HintPath>D:\github\CompileFiles\Mirror-Publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\github\CompileFiles\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>D:\github\CompileFiles\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(TargetPath) $(APPDATA)\EXILED\Plugins" />
+  </Target>
+</Project>
