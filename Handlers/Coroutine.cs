@@ -4,6 +4,7 @@ using InventorySystem.Items.Pickups;
 using MEC;
 using Mirror;
 using UnityEngine;
+using PlayerRoles;
 
 namespace ObjectSanitizer.Handlers;
 
@@ -33,7 +34,7 @@ public static class Coroutine
                     if (!SpawnedNetworkIdentity.ContainsKey(player))
                         SpawnedNetworkIdentity.Add(player, networkIdenitites);
 
-                    if (player.IsDead)
+                    if (player.IsDead || player.Role.Type == RoleTypeId.Scp079)
                     {
                         SpawnAllIfNot(networkIdenitites, player);
                         continue;

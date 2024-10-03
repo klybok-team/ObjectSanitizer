@@ -9,7 +9,7 @@ public class Config : IConfig
     [Description("Indicates debug is enabled or not.")]
     public bool Debug { get; set; } = false;
     [Description("Indicates delay objects update.")]
-    public float Delay { get; set; } = 0.5f;
+    public float Delay { get; set; } = 15f;
     [Description("Indicates object resfresh distance.")]
-    public float RefreshDistance { get; set; } = 75f;
+    public float RefreshDistance { get; set; } = 125f;
 }
