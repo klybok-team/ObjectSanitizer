@@ -36,6 +36,8 @@ public static class Coroutine
 
                     foreach (NetworkIdentity? networkIdenitity in CachedNetworkIdentities.ToList())
                     {
+                        if (networkIdenitity.transform == null) continue;
+
                         if (networkIdenitity.netId == 0) continue;
 
                         ProcessNetworkIdentity(player, networkIdenitity, Config.RefreshDistance);
@@ -56,6 +58,8 @@ public static class Coroutine
 
         foreach (NetworkIdentity identity in networkIdentities)
         {
+            if (identity.transform == null) continue;
+            
             if (SpawnedNetworkIdentity[pl].Contains(identity)) return;
 
             Log.Debug($"added object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}], spawning all");
@@ -69,7 +73,7 @@ public static class Coroutine
     {
         if (identity.transform == null) return;
 
-        if ((pl.Position - identity.transform.position).sqrMagnitude <= (renderDistance * renderDistance))
+        if (Vector3.Distance(pl.Position, identity.transform.position) <= (renderDistance * renderDistance))
         {
             if (SpawnedNetworkIdentity[pl].Contains(identity)) return;
 

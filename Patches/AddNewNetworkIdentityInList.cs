@@ -20,7 +20,7 @@ public static class AddNewNetworkIdentityInList
     public static void Postfix(NetworkIdentity __instance)
     {
         // не добавляем в список если это не пикап  и не админтой дрочит емне
-        if (__instance.GetComponent<ItemPickupBase>() is null && __instance.GetComponent<AdminToyBase>() is null) return;
+        if (!__instance.TryGetComponent<ItemPickupBase>(out _) && !__instance.TryGetComponent<AdminToyBase>(out _)) return;
 
         Log.Debug($"recived new networkidenity, OnStartServer, [{__instance.netId}]");
 
