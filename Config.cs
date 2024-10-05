@@ -12,4 +12,8 @@ public class Config : IConfig
     public float Delay { get; set; } = 15f;
     [Description("Indicates object resfresh distance.")]
     public float RefreshDistance { get; set; } = 125f;
+    [Description("Ignored root objects." +
+        "\nFor scheamtics use - CustomSchematic-nameOfUseSchematic" +
+        "\nYou can debug root objects name by enabling debug (!!! DO NOT TURN ON PRODUCTION !!!)")]
+    public List<string> IgnoredRootObjects { get; set; } = new();
 }

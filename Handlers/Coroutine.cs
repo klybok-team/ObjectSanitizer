@@ -5,15 +5,17 @@ using MEC;
 using Mirror;
 using UnityEngine;
 using PlayerRoles;
+using System.Collections.Generic;
 
 namespace ObjectSanitizer.Handlers;
 
 public static class Coroutine
 {
+    public static List<NetworkIdentity> CachedNetworkIdentities = new();
+
     public static Dictionary<Player, List<NetworkIdentity>> SpawnedNetworkIdentity = new();
 
-    public static float RenderDistance { get; set; } = 75;
-    public static float Delay { get; set; } = 0.5f;
+    public static Configs.Config Config { get; set; } = new();
 
     public static IEnumerator<float> Process()
     {
@@ -21,30 +23,22 @@ public static class Coroutine
         {
             try
             {
-                List<NetworkIdentity> networkIdenitites = UnityEngine.Object.FindObjectsOfType<NetworkIdentity>().ToList();
-
-                // оставляем только пикапы и все спавненные админами штуки
-                // примитивы свет вся хуйня
-                networkIdenitites = networkIdenitites.Where(x =>
-                x.GetComponent<ItemPickupBase>() is not null
-                || x.GetComponent<AdminToyBase>() is not null).ToList();
-
                 foreach (Player? player in Player.List)
                 {
                     if (!SpawnedNetworkIdentity.ContainsKey(player))
-                        SpawnedNetworkIdentity.Add(player, networkIdenitites);
+                        SpawnedNetworkIdentity.Add(player, CachedNetworkIdentities);
 
                     if (player.IsDead || player.Role.Type == RoleTypeId.Scp079)
                     {
-                        SpawnAllIfNot(networkIdenitites, player);
+                        SpawnAllIfNot(CachedNetworkIdentities, player);
                         continue;
                     }
 
-                    foreach (NetworkIdentity? networkIdenitity in networkIdenitites.ToList())
+                    foreach (NetworkIdentity? networkIdenitity in CachedNetworkIdentities.ToList())
                     {
                         if (networkIdenitity.netId == 0) continue;
 
-                        ProcessNetworkIdentity(player, networkIdenitity, RenderDistance);
+                        ProcessNetworkIdentity(player, networkIdenitity, Config.RefreshDistance);
                     }
                 }
             }
@@ -52,7 +46,8 @@ public static class Coroutine
             {
                 Log.Error(e);
             }
-            yield return Timing.WaitForSeconds(Delay);
+
+            yield return Timing.WaitForSeconds(Config.Delay);
         }
     }
     public static void SpawnAllIfNot(List<NetworkIdentity> networkIdentities, Player pl)
@@ -63,6 +58,8 @@ public static class Coroutine
         {
             if (SpawnedNetworkIdentity[pl].Contains(identity)) return;
 
+            Log.Debug($"added object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}], spawning all");
+
             pl.ReferenceHub.connectionToClient.AddToObserving(identity);
 
             SpawnedNetworkIdentity[pl].Add(identity);
@@ -72,11 +69,11 @@ public static class Coroutine
     {
         if (identity.transform == null) return;
 
-        if (Vector3.Distance(pl.Position, identity.transform.position) <= renderDistance)
+        if ((pl.Position - identity.transform.position).sqrMagnitude <= (renderDistance * renderDistance))
         {
             if (SpawnedNetworkIdentity[pl].Contains(identity)) return;
 
-            // Log.Info($"sended [{pl.Id}] spawn message with [{identity.netId}, {identity.name}, is door: {identity.GetComponent<BasicDoor>() is not null}, is room {identity.GetComponent<RoomIdentifier>() is not null}] netid");
+            Log.Debug($"added object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}]");
 
             pl.ReferenceHub.connectionToClient.AddToObserving(identity);
 
@@ -86,7 +83,7 @@ public static class Coroutine
         {
             if (!SpawnedNetworkIdentity[pl].Contains(identity)) return;
 
-            // Log.Info($"sended [{pl.Id}] destroy message with [{identity.NetworkBehaviours.FirstOrDefault()}, {identity.name}, is door: {identity.GetComponent<BasicDoor>() is not null}, is room {identity.GetComponent<RoomIdentifier>() is not null}] netid");
+            Log.Debug($"removed object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}]");
 
             pl.ReferenceHub.connectionToClient.RemoveFromObserving(identity, false);
 
