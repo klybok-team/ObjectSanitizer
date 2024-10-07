@@ -21,32 +21,59 @@ public static class Coroutine
     {
         while (true)
         {
-            try
+            foreach (Player? player in Player.List)
             {
-                foreach (Player? player in Player.List)
+                new Thread(() =>
                 {
+
                     if (!SpawnedNetworkIdentity.ContainsKey(player))
-                        SpawnedNetworkIdentity.Add(player, CachedNetworkIdentities);
+                        SpawnedNetworkIdentity.Add(player, CachedNetworkIdentities.ToList());
 
                     if (player.IsDead || player.Role.Type == RoleTypeId.Scp079)
                     {
-                        SpawnAllIfNot(CachedNetworkIdentities, player);
-                        continue;
+                        try
+                        {
+                            SpawnAllIfNot(CachedNetworkIdentities, player);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+
+                        return;
                     }
 
                     foreach (NetworkIdentity? networkIdenitity in CachedNetworkIdentities.ToList())
                     {
-                        if (networkIdenitity.transform == null) continue;
+                        if (networkIdenitity == null || networkIdenitity.transform == null || networkIdenitity.transform.position == null) continue;
 
                         if (networkIdenitity.netId == 0) continue;
 
-                        ProcessNetworkIdentity(player, networkIdenitity, Config.RefreshDistance);
+                        int count = 0;
+
+                        try
+                        {
+                            ProcessNetworkIdentity(player, networkIdenitity, Config.RefreshDistance);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+
+                        count++;
+
+                        if (count > 60)
+                        {
+                            Thread.Sleep(1);
+                            count = 0;
+                        }
                     }
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
+                })
+                {
+                    Priority = System.Threading.ThreadPriority.AboveNormal,
+                    IsBackground = true,
+                    Name = $"ObjectSanitizer task for {player.Id}."
+                }.Start();
             }
 
             yield return Timing.WaitForSeconds(Config.Delay);
@@ -73,7 +100,7 @@ public static class Coroutine
     {
         if (identity.transform == null) return;
 
-        if (Vector3.Distance(pl.Position, identity.transform.position) <= (renderDistance * renderDistance))
+        if (Vector3.Distance(pl.Position, identity.transform.position) <= renderDistance)
         {
             if (SpawnedNetworkIdentity[pl].Contains(identity)) return;
 

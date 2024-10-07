@@ -22,12 +22,12 @@ public static class AddNewNetworkIdentityInList
         // не добавляем в список если это не пикап  и не админтой дрочит емне
         if (!__instance.TryGetComponent<ItemPickupBase>(out _) && !__instance.TryGetComponent<AdminToyBase>(out _)) return;
 
-        Log.Debug($"recived new networkidenity, OnStartServer, [{__instance.netId}]");
+        Log.Debug($"recived new networkidenity, OnStartServer, [{__instance.netId}, {__instance.transform.name}]");
+
+        // добавляем в заспавненные нетврокайденити ну потому что они заспавнены по умолчанию ебать открыл америку
+        Coroutine.SpawnedNetworkIdentity.ForEach(x => x.Value.Add(__instance));
 
         // добавляем в кеш ну потом учто каждый раз обрабатывать 1488 объектов это не круто -тпс
         Coroutine.CachedNetworkIdentities.Add(__instance);
-        
-        // добавляем в заспавненные нетврокайденити ну потому что они заспавнены по умолчанию ебать открыл америку
-        Coroutine.SpawnedNetworkIdentity.ForEach(x => x.Value.Add(__instance));
     }
 }

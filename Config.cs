@@ -8,6 +8,8 @@ public class Config : IConfig
     public bool IsEnabled { get; set; } = true;
     [Description("Indicates debug is enabled or not.")]
     public bool Debug { get; set; } = false;
+    [Description("Indicates delay after round start before coroutine will be launched.")]
+    public float DelayAfterRoundStart { get; set; } = 15f;
     [Description("Indicates delay objects update.")]
     public float Delay { get; set; } = 15f;
     [Description("Indicates object resfresh distance.")]

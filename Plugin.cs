@@ -44,6 +44,8 @@ public class ObjectSanitizer : Plugin<Configs.Config>
     public void OnRoundStarted_HandleCoroutine()
     {
         if (UpdaterCoroutineHandle == null || !UpdaterCoroutineHandle.IsRunning)
-            UpdaterCoroutineHandle = Timing.RunCoroutine(Coroutine.Process());
+        {
+            Timing.CallDelayed(Config.DelayAfterRoundStart, () => UpdaterCoroutineHandle = Timing.RunCoroutine(Coroutine.Process()));
+        }
     }
 }
