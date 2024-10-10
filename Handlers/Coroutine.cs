@@ -23,102 +23,105 @@ public static class Coroutine
         {
             foreach (Player? player in Player.List)
             {
-                new Thread(() =>
+                if (!SpawnedNetworkIdentity.ContainsKey(player))
+                    SpawnedNetworkIdentity.Add(player, CachedNetworkIdentities.ToList());
+
+                if ((player.IsDead || player.Role.Type == RoleTypeId.Scp079) && !SpawnedNetworkIdentity.All(x => x.Value == CachedNetworkIdentities))
                 {
-
-                    if (!SpawnedNetworkIdentity.ContainsKey(player))
-                        SpawnedNetworkIdentity.Add(player, CachedNetworkIdentities.ToList());
-
-                    if (player.IsDead || player.Role.Type == RoleTypeId.Scp079)
+                    try
                     {
-                        try
-                        {
-                            SpawnAllIfNot(CachedNetworkIdentities, player);
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e);
-                        }
-
-                        return;
+                        Timing.RunCoroutine(SpawnAllIfNot(CachedNetworkIdentities.ToList(), player));
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e);
                     }
 
-                    foreach (NetworkIdentity? networkIdenitity in CachedNetworkIdentities.ToList())
-                    {
-                        if (networkIdenitity == null || networkIdenitity.transform == null || networkIdenitity.transform.position == null) continue;
+                    continue;
+                }
 
-                        if (networkIdenitity.netId == 0) continue;
-
-                        int count = 0;
-
-                        try
-                        {
-                            ProcessNetworkIdentity(player, networkIdenitity, Config.RefreshDistance);
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e);
-                        }
-
-                        count++;
-
-                        if (count > 60)
-                        {
-                            Thread.Sleep(1);
-                            count = 0;
-                        }
-                    }
-                })
-                {
-                    Priority = System.Threading.ThreadPriority.AboveNormal,
-                    IsBackground = true,
-                    Name = $"ObjectSanitizer task for {player.Id}."
-                }.Start();
+                Timing.RunCoroutine(ProcessNetworkIdentity(player, CachedNetworkIdentities.ToList(), Config.RefreshDistance));
             }
 
             yield return Timing.WaitForSeconds(Config.Delay);
         }
     }
-    public static void SpawnAllIfNot(List<NetworkIdentity> networkIdentities, Player pl)
+    public static IEnumerator<float> SpawnAllIfNot(List<NetworkIdentity> networkIdentities, Player pl)
     {
-        if (SpawnedNetworkIdentity.All(x => x.Value == networkIdentities)) return;
+        if (SpawnedNetworkIdentity.All(x => x.Value == networkIdentities)) yield break;
+
+        int count = 0;
 
         foreach (NetworkIdentity identity in networkIdentities)
         {
-            if (identity.transform == null) continue;
-            
-            if (SpawnedNetworkIdentity[pl].Contains(identity)) return;
+            if (identity == null || identity.transform == null || identity.transform.position == null) continue;
+
+            if (identity.netId == 0) continue;
+
+            if (SpawnedNetworkIdentity[pl].Contains(identity)) continue;
 
             Log.Debug($"added object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}], spawning all");
 
             pl.ReferenceHub.connectionToClient.AddToObserving(identity);
 
             SpawnedNetworkIdentity[pl].Add(identity);
+            if (count > 15)
+            {
+                yield return Timing.WaitForOneFrame;
+
+                count = 0;
+            }
+
+            count++;
         }
     }
-    public static void ProcessNetworkIdentity(Player pl, NetworkIdentity identity, float renderDistance)
+    public static IEnumerator<float> ProcessNetworkIdentity(Player pl, List<NetworkIdentity> networkIdentities, float renderDistance)
     {
-        if (identity.transform == null) return;
+        // грузим чанками чтоб не лагало круто ZZZVZVZVZVVVZOVZOVPOVZVOZOVZOVOVOZOVOV CBO
+        int count = 0;
 
-        if (Vector3.Distance(pl.Position, identity.transform.position) <= renderDistance)
+        foreach (var identity in networkIdentities.ToList())
         {
-            if (SpawnedNetworkIdentity[pl].Contains(identity)) return;
+            try
+            {
+                if (identity == null || identity.transform == null || identity.transform.position == null) continue;
 
-            Log.Debug($"added object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}]");
+                if (identity.netId == 0) continue;
 
-            pl.ReferenceHub.connectionToClient.AddToObserving(identity);
+                if (Vector3.Distance(pl.Position, identity.transform.position) <= renderDistance)
+                {
+                    if (SpawnedNetworkIdentity[pl].Contains(identity)) continue;
 
-            SpawnedNetworkIdentity[pl].Add(identity);
-        }
-        else
-        {
-            if (!SpawnedNetworkIdentity[pl].Contains(identity)) return;
+                    Log.Debug($"added object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}]");
 
-            Log.Debug($"removed object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}]");
+                    pl.ReferenceHub.connectionToClient.AddToObserving(identity);
 
-            pl.ReferenceHub.connectionToClient.RemoveFromObserving(identity, false);
+                    SpawnedNetworkIdentity[pl].Add(identity);
+                }
+                else
+                {
+                    if (!SpawnedNetworkIdentity[pl].Contains(identity)) continue;
 
-            SpawnedNetworkIdentity[pl].Remove(identity);
+                    Log.Debug($"removed object from observing [{identity.netId}, {identity.name}] to [PID: {pl.Id}]");
+
+                    pl.ReferenceHub.connectionToClient.RemoveFromObserving(identity, false);
+
+                    SpawnedNetworkIdentity[pl].Remove(identity);
+                }
+            }
+            catch(System.Exception ex)
+            {
+                Log.Error(ex);
+            }
+
+            if (count > 15)
+            {
+                yield return Timing.WaitForOneFrame;
+
+                count = 0;
+            }
+
+            count++;
         }
     }
 }
