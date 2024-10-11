@@ -18,4 +18,7 @@ public class Config : IConfig
         "\nFor scheamtics use - CustomSchematic-nameOfUseSchematic" +
         "\nYou can debug root objects name by enabling debug (!!! DO NOT TURN ON PRODUCTION !!!)")]
     public List<string> IgnoredRootObjects { get; set; } = new();
+    [Description("Ignored objects by name." +
+        "\nObjects will never be destroyed by plugin (i recommened it if you have teleporters by more than render distance)")]
+    public List<string> IgnoredNameObjects { get; set; } = new();
 }
