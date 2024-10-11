@@ -26,21 +26,18 @@ public static class Coroutine
                 if (!SpawnedNetworkIdentity.ContainsKey(player))
                     SpawnedNetworkIdentity.Add(player, CachedNetworkIdentities.ToList());
 
-                if ((player.IsDead || player.Role.Type == RoleTypeId.Scp079) && !SpawnedNetworkIdentity.All(x => x.Value == CachedNetworkIdentities))
+                if (player.IsDead || player.Role.Type == RoleTypeId.Scp079)
                 {
-                    try
-                    {
+                    if (!SpawnedNetworkIdentity.All(x => x.Value == CachedNetworkIdentities))
                         Timing.RunCoroutine(SpawnAllIfNot(CachedNetworkIdentities.ToList(), player));
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e);
-                    }
 
-                    continue;
+                    goto wait;
                 }
 
                 Timing.RunCoroutine(ProcessNetworkIdentity(player, CachedNetworkIdentities.ToList(), Config.RefreshDistance));
+
+wait:
+                yield return Timing.WaitForOneFrame;
             }
 
             yield return Timing.WaitForSeconds(Config.Delay);
@@ -65,7 +62,8 @@ public static class Coroutine
             pl.ReferenceHub.connectionToClient.AddToObserving(identity);
 
             SpawnedNetworkIdentity[pl].Add(identity);
-            if (count > 15)
+
+            if (count > 55)
             {
                 yield return Timing.WaitForOneFrame;
 
@@ -114,7 +112,7 @@ public static class Coroutine
                 Log.Error(ex);
             }
 
-            if (count > 15)
+            if (count > 55)
             {
                 yield return Timing.WaitForOneFrame;
 
