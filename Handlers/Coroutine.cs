@@ -14,7 +14,7 @@ public static class Coroutine
     public static List<NetworkIdentity> CachedNetworkIdentities = new();
 
     public static Dictionary<Player, List<NetworkIdentity>> SpawnedNetworkIdentity = new();
-
+    public static List<Player> CurrentlyProcessing { get; set; } = new();
     public static Configs.Config Config { get; set; } = new();
 
     public static IEnumerator<float> Process()
@@ -25,6 +25,8 @@ public static class Coroutine
             {
                 if (!SpawnedNetworkIdentity.ContainsKey(player))
                     SpawnedNetworkIdentity.Add(player, CachedNetworkIdentities.ToList());
+
+                if (CurrentlyProcessing.Contains(player)) continue;
 
                 if (player.IsDead || player.Role.Type == RoleTypeId.Scp079)
                 {
@@ -46,6 +48,8 @@ wait:
     public static IEnumerator<float> SpawnAllIfNot(List<NetworkIdentity> networkIdentities, Player pl)
     {
         if (SpawnedNetworkIdentity.All(x => x.Value == networkIdentities)) yield break;
+
+        CurrentlyProcessing.Add(pl);
 
         int count = 0;
 
@@ -72,9 +76,13 @@ wait:
 
             count++;
         }
+
+        CurrentlyProcessing.Remove(pl);
     }
     public static IEnumerator<float> ProcessNetworkIdentity(Player pl, List<NetworkIdentity> networkIdentities, float renderDistance)
     {
+        CurrentlyProcessing.Add(pl);
+
         // грузим чанками чтоб не лагало круто ZZZVZVZVZVVVZOVZOVPOVZVOZOVZOVOVOZOVOV CBO
         int count = 0;
 
@@ -121,5 +129,7 @@ wait:
 
             count++;
         }
+        
+        CurrentlyProcessing.Remove(pl);
     }
 }
