@@ -1,11 +1,8 @@
-﻿using AdminToys;
-using Exiled.API.Features;
-using InventorySystem.Items.Pickups;
+﻿using Exiled.API.Features;
 using MEC;
 using Mirror;
 using UnityEngine;
 using PlayerRoles;
-using System.Collections.Generic;
 
 namespace ObjectSanitizer.Handlers;
 
@@ -38,7 +35,7 @@ public static class Coroutine
 
                 Timing.RunCoroutine(ProcessNetworkIdentity(player, CachedNetworkIdentities.ToList(), Config.RefreshDistance));
 
-wait:
+            wait:
                 yield return Timing.WaitForOneFrame;
             }
 
@@ -86,7 +83,7 @@ wait:
         // грузим чанками чтоб не лагало круто ZZZVZVZVZVVVZOVZOVPOVZVOZOVZOVOVOZOVOV CBO
         int count = 0;
 
-        foreach (var identity in networkIdentities.ToList())
+        foreach (NetworkIdentity? identity in networkIdentities.ToList())
         {
             try
             {
@@ -115,7 +112,7 @@ wait:
                     SpawnedNetworkIdentity[pl].Remove(identity);
                 }
             }
-            catch(System.Exception ex)
+            catch (System.Exception ex)
             {
                 Log.Error(ex);
             }
@@ -129,7 +126,7 @@ wait:
 
             count++;
         }
-        
+
         CurrentlyProcessing.Remove(pl);
     }
 }

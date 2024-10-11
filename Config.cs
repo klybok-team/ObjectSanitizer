@@ -11,7 +11,7 @@ public class Config : IConfig
     [Description("Indicates delay after round start before coroutine will be launched.")]
     public float DelayAfterRoundStart { get; set; } = 15f;
     [Description("Indicates delay objects update.")]
-    public float Delay { get; set; } = 15f;
+    public float Delay { get; set; } = 5;
     [Description("Indicates object resfresh distance.")]
     public float RefreshDistance { get; set; } = 125f;
     [Description("Ignored root objects." +
