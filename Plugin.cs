@@ -16,7 +16,6 @@ public class ObjectSanitizer : Plugin<Configs.Config>
     public override void OnEnabled()
     {
         Exiled.Events.Handlers.Server.RoundStarted += OnRoundStarted_HandleCoroutine;
-        Exiled.Events.Handlers.Server.ReloadedConfigs += OnReloadedConfigs_RefreshConfig;
 
         Coroutine.Config = Config;
 
@@ -28,7 +27,6 @@ public class ObjectSanitizer : Plugin<Configs.Config>
     public override void OnDisabled()
     {
         Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStarted_HandleCoroutine;
-        Exiled.Events.Handlers.Server.ReloadedConfigs -= OnReloadedConfigs_RefreshConfig;
 
         Timing.KillCoroutines(UpdaterCoroutineHandle);
 
@@ -36,10 +34,6 @@ public class ObjectSanitizer : Plugin<Configs.Config>
         Harmony = null;
 
         base.OnDisabled();
-    }
-    public void OnReloadedConfigs_RefreshConfig()
-    {
-        Coroutine.Config = Config;
     }
     public void OnRoundStarted_HandleCoroutine()
     {
