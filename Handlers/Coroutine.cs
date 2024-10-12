@@ -91,7 +91,7 @@ public static class Coroutine
 
                 if (identity.netId == 0) continue;
 
-                if (Vector3.Distance(pl.Position, identity.transform.position) <= renderDistance)
+                if ((pl.Position - identity.transform.position).sqrMagnitude <= (renderDistance * renderDistance))
                 {
                     if (SpawnedNetworkIdentity[pl].Contains(identity)) continue;
 
