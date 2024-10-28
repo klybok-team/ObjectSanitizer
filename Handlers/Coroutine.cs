@@ -64,7 +64,7 @@ public static class Coroutine
 
             SpawnedNetworkIdentity[pl].Add(identity);
 
-            if (count > 55)
+            if (count > Config.ChunkCount)
             {
                 yield return Timing.WaitForOneFrame;
 
@@ -117,7 +117,7 @@ public static class Coroutine
                 Log.Error(ex);
             }
 
-            if (count > 55)
+            if (count > Config.ChunkCount)
             {
                 yield return Timing.WaitForOneFrame;
 

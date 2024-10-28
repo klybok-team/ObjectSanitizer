@@ -11,7 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EXILED-OFFICIAL" Version="8.12.2" />
+    <Compile Remove="Exiled\**" />
+    <EmbeddedResource Remove="Exiled\**" />
+    <None Remove="Exiled\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExMod.Exiled" Version="8.13.1" />
     <PackageReference Include="Lib.Harmony" Version="2.3.3" />
   </ItemGroup>
   

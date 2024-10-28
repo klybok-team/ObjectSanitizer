@@ -20,13 +20,13 @@ public static class AddNewNetworkIdentityInList
         // не добавляем объекты если они в игнОРЕ (НИХУЯ ЛЕВ НА КОНДИЦИЯХ)
         if (__instance.transform.root != null && Coroutine.Config.IgnoredRootObjects.Contains(__instance.transform.root.name))
         {
-            Log.Error($"DON'T adding {__instance.transform.name} cuz {__instance.transform.root.name} is ignored");
+            Log.Debug($"DON'T adding {__instance.transform.name} cuz {__instance.transform.root.name} is ignored");
             return;
         }
 
         if (Coroutine.Config.IgnoredNameObjects.Contains(__instance.transform.name))
         {
-            Log.Error($"DON'T adding {__instance.transform.name} cuz it ignored");
+            Log.Debug($"DON'T adding {__instance.transform.name} cuz it ignored");
             return;
         }
 
